@@ -1,0 +1,277 @@
+{
+  "name": "newvolgtm",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        448
+      ],
+      "id": "8ae536c5-c459-4d85-a7ec-6f7a512ad791",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1-5"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1232,
+        688
+      ],
+      "id": "f2244ad1-5a19-416a-98d2-034ec0f03f32",
+      "name": "Daily Schedule (9AM EST)2"
+    },
+    {
+      "parameters": {
+        "url": "https://jsearch.p.rapidapi.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "= {{ $json.keyword }} jobs in UK"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "num_pages",
+              "value": "1"
+            },
+            {
+              "name": "country",
+              "value": "gb"
+            },
+            {
+              "name": "date_posted",
+              "value": "month"
+            },
+            {
+              "name": "employment_types",
+              "value": "FULLTIME, CONTRACTOR, PARTTIME, INTERN"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "jsearch.p.rapidapi.com"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 10000
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -480,
+        608
+      ],
+      "id": "8b1757de-4f13-464f-bce3-2b21a8431337",
+      "name": "Job Scraper2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "cMvU3IrfuYisILxD",
+          "name": "RapidAPI JSearch"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "⚠️ SECURITY: Move x-rapidapi-key to n8n Credentials!\n\nRapidAPI JSearch - Fetches GTM/Clay jobs from the past week."
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { keyword: \"GTM Engineer\" } },\n  { json: { keyword: \"Go To Market Engineer\" } },\n  { json: { keyword: \"Clay GTM\" } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        608
+      ],
+      "id": "778cc6c3-7157-4111-a6c6-4e80cb3fb8c1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        608
+      ],
+      "id": "6de0d1da-a276-4ea9-bee6-aecb747b7358",
+      "name": "Wait",
+      "webhookId": "d50aa357-6071-4fdb-961c-053e3dee6d1f"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "jobs",
+        "columnToMatchOn": "job_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2,
+      "position": [
+        400,
+        800
+      ],
+      "id": "137cbbfe-a17e-4b06-8bfc-227a91fc683d",
+      "name": "MySQL Insert",
+      "credentials": {
+        "mySql": {
+          "id": "Mmz0SsGmSZ76dUMn",
+          "name": "MySQL account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        672
+      ],
+      "id": "9bcecdb9-646e-4936-8ccd-3b2150919cac",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const j = item.json;\n  return {\n    json: {\n      job_id: j.job_id,\n      job_title: j.job_title,\n      employer_name: j.employer_name,\n      job_location: j.job_location,\n      job_country: j.job_country,\n      job_employment_type: j.job_employment_type,\n      job_is_remote: j.job_is_remote ? 1 : 0,\n      job_posted_at_datetime_utc: j.job_posted_at_datetime_utc ? new Date(j.job_posted_at_datetime_utc).toISOString().slice(0, 19).replace('T', ' ') : null,\n      job_apply_link: j.job_apply_link,\n      job_google_link: j.job_google_link,\n      job_description: j.job_description\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        736
+      ],
+      "id": "f869b5e1-fbd6-47ab-a05f-e7b9a5488544",
+      "name": "Prepare Job Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule (9AM EST)2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Scraper2": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Job Scraper2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Job Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Job Data": {
+      "main": [
+        [
+          {
+            "node": "MySQL Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9f0cb272-d254-4d5c-8a03-c1a4c5f18c4f",
+  "meta": {
+    "instanceId": "238e209ef863af056f51ef319ce60e54301f4959b4ddfd37a8126b18abdcba6f"
+  },
+  "id": "YmXQzaBXPi8po228ZIwem",
+  "tags": []
+}
