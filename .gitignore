@@ -6,4 +6,6 @@ tempCodeRunnerFile.js
 .env
 dist/
 build/
+render_environment.txt
 *.log
+
