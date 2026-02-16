@@ -1,0 +1,9 @@
+id_rsa_mysql.txt
+node_modules/
+tempCodeRunnerFile.js
+.gemini/
+.claude/
+.env
+dist/
+build/
+*.log
