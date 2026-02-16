@@ -1,0 +1,11 @@
+{
+  "name": "vol2gtm",
+  "version": "1.0.0",
+  "description": "GTM workflow with SSH tunnel for n8n",
+  "scripts": {
+    "start": "bash start.sh"
+  },
+  "dependencies": {
+    "tunnel-ssh": "^5.2.0"
+  }
+}
