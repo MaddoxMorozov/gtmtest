@@ -2,9 +2,6 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Install openssh-client for SSH tunnel (n8n image is Debian-based)
-RUN apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
-
 # Set working directory
 WORKDIR /app
 
@@ -23,5 +20,5 @@ COPY newvolgtmwa-fixed.json ./
 # n8n default port
 EXPOSE 5678
 
-# Use bash to run the startup script
-ENTRYPOINT ["bash", "start.sh"]
+# Run startup script with sh (bash may not be available in minimal Alpine image)
+ENTRYPOINT ["sh", "start.sh"]

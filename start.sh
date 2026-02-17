@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "=== Render Combined Startup ==="
 echo ""
@@ -33,7 +33,7 @@ echo ""
 # Step 4: Start n8n
 # Use 'n8n' directly if available (Docker image), fall back to npx
 echo "Step 4: Starting n8n..."
-if command -v n8n &> /dev/null; then
+if command -v n8n > /dev/null 2>&1; then
   n8n start
 else
   npx n8n start
