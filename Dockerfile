@@ -2,8 +2,8 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Install bash (already present in n8n image, but ensure it's available)
-RUN apk add --no-cache bash openssh-client
+# Install openssh-client for SSH tunnel (n8n image is Debian-based)
+RUN apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
