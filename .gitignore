@@ -1,11 +1,40 @@
+# Private keys and credentials
 id_rsa_mysql.txt
-node_modules/
-tempCodeRunnerFile.js
-.gemini/
-.claude/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+*.ppk
+
+# Environment and secrets
 .env
+.env.*
+!.env.example
+render_environment.txt
+
+# Test/dev files with hardcoded credentials
+dbtest/
+
+# Dependencies
+node_modules/
+
+# Build artifacts
 dist/
 build/
-render_environment.txt
+tempCodeRunnerFile.js
 *.log
+
+# IDE / tool dirs
+.gemini/
+.claude/
+
+# Old workflow versions (may contain secrets)
+newvolgtmwa.json
+
+# Office files that may contain sensitive info
+docmentation.docx
+
+# Security fix script (not needed in production)
+fix_security.py
 
